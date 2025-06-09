@@ -198,7 +198,7 @@ class Nightjet:
         connections = self._get_connections(travel_date, results)
 
         with div():
-            with h3(f'{self.from_station} -> {self.to_station} connections up from {travel_date}:'):
+            with h3(f'{self.from_station} -> {self.to_station} connections up from {travel_date}'):
                 attr(cls='headline')
 
             with ol():
@@ -207,7 +207,7 @@ class Nightjet:
 
                 for x, connection in enumerate(connections):
                     with li(f'{connection}:'):
-                        attr(cls={'even' if x % 2 == 0 else 'odd'})
+                        attr(cls='even' if x % 2 == 0 else 'odd')
                         p(f'- No offers') if not connection.offers else [p(f'- {str(o)}') for o in connection.offers]
 
         return div
@@ -232,7 +232,7 @@ doc = dominate.document(title='Nightjet offers retrieved from https://www.nightj
 with doc.head:
     link(rel='stylesheet', href='style.css')
 with doc:
-    p(f'Requested at {datetime.today().strftime("%d-%m-%Y %H:%M:%S")} from {BOOKING_URL}')
+    p(f'Requested at {datetime.today().strftime("%d.%m.%Y %H:%M:%S")} from {BOOKING_URL}')
     for journey in journeys:
         nightjet = Nightjet(journey[0], journey[1], travelers)
         nightjet.list_offers(journey[2], int(journey[3]) if len(journey) > 3 else 3)

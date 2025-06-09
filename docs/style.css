@@ -4,9 +4,9 @@
 }
 
 li.odd {
-    background-color: #FFF;
+    background-color: #EEE;
 }
 
 li.even {
-    background-color: #EEE;
+    background-color: #FFF;
 }
