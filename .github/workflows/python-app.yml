@@ -31,11 +31,25 @@ jobs:
 
     - name: Run script
       run: |
-        python check.py > results.txt
+        python check.py 'München' 'Mailand' > results.txt
 
-    - uses: actions/upload-artifact@v4
+    - name: Checkout wiki code
+      uses: actions/checkout@v4
       with:
-        name: results
-        path: results.txt
-        overwrite: true
-        compression-level: 0
+        repository: ${{github.repository}}.wiki
+        path: wiki
+    - name: Push to wiki
+      run: |
+        cd wiki
+        cp ../results.txt .
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add .
+        git diff-index --quiet HEAD || git commit -m "Update wiki" && git push
+
+#    - uses: actions/upload-artifact@v4
+#      with:
+#        name: results
+#        path: results.txt
+#        overwrite: true
+#        compression-level: 0

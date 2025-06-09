@@ -3,6 +3,7 @@ import requests
 from typing import List, Dict
 from jsonpath2.path import Path
 from datetime import date, timedelta
+import sys
 
 BOOKING_URL= f'https://www.nightjet.com/nj-booking-ocp'
 
@@ -192,10 +193,14 @@ class Nightjet:
         print('')
 
 
+if len(sys.argv) < 3:
+    print("Missing start and destination station / city arguments")
+    exit(-1)
+
 print(f'Creation date: {date.today().strftime("%Y-%m-%d")}')
 
 travelers = [Traveler.female(1983), Traveler.male(1979), Traveler.male(2011), Traveler.male(2017)]
-nightjet = Nightjet('München', 'Mailand', travelers)
+nightjet = Nightjet(sys.argv[1], sys.argv[2], travelers)
 nightjet.list_offers(False, '2025-10-18', 6)
 nightjet.list_offers(True, '2025-10-27', 6)
 # just 2 check if it works we try 2 retrieve offers close 2 now
