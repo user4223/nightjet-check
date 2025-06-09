@@ -29,9 +29,14 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
+    - name: Publish results to wiki
+      uses: Andrew-Chen-Wang/github-wiki-action@v4
+      with:
+        path: wiki
+
     - name: Run script
       run: |
-        python check.py 'München|Mailand|2025-10-18|6' 'Mailand|München|2025-10-27|6' 'Berlin|Wien|2025-10-18' > results.txt
+        python check.py 'München|Mailand|2025-10-18|6' 'Mailand|München|2025-10-27|6' 'Berlin|Wien|2025-10-18' > wiki/results.txt
 
 #    - name: Checkout wiki code
 #      uses: actions/checkout@v4
@@ -49,10 +54,6 @@ jobs:
 #        git config --local user.name "GitHub Action"
 #        git add .
 #        git diff-index --quiet HEAD || git commit -m "Update wiki" && git push
-
-    - uses: Andrew-Chen-Wang/github-wiki-action@v4
-      with:
-        path: results.txt
 
 #    - uses: actions/upload-artifact@v4
 #      with:
