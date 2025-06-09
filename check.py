@@ -212,11 +212,12 @@ class Nightjet:
 
                         with ul():
                             if not connection.offers:
-                                li(f'No offers')
+                                li(span(f'No offers'))
 
                             for y, offer in enumerate(connection.offers):
-                                with li(f'{offer.name}'):
-                                    p(f'{", ".join(offer.details)}')
+                                with li(span(f'{offer.name}')):
+                                    br()
+                                    span(f'{", ".join(offer.details)}')
 
         return div
 
