@@ -38,3 +38,4 @@ jobs:
         name: results
         path: results.txt
         overwrite: true
+        compression-level: 0
