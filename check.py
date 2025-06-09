@@ -184,12 +184,15 @@ class Nightjet:
                     }
                     offers = Offer.from_json(requests.post(f'{BOOKING_URL}/offer/get', headers=self.default_header, json=self.default_body | body).json())
 
-                    print(f'  {connection}:')
-                    print(f'  - No offers') if not offers else [print(f'  - {str(o)}') for o in offers]
                     connections.append(connection)
+                    print(f'  {len(connections)}: {connection}:')
+                    print(f'  - No offers') if not offers else [print(f'  - {str(o)}') for o in offers]
+
 
         print('')
 
+
+print(f'Creation date: {date.today().strftime("%Y-%m-%d")}')
 
 travelers = [Traveler.female(1983), Traveler.male(1979), Traveler.male(2011), Traveler.male(2017)]
 nightjet = Nightjet('München', 'Mailand', travelers)
