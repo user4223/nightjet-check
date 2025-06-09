@@ -241,7 +241,7 @@ doc = dominate.document(title='Nightjet offers retrieved from https://www.nightj
 with doc.head:
     link(rel='stylesheet', href='style.css')
 with doc:
-    p(f'Requested at {datetime.today().strftime("%d.%m.%Y %H:%M:%S")} from {BOOKING_URL}')
+    p(f'Retrieved from {BOOKING_URL} at {datetime.today().strftime("%d.%m.%Y %H:%M:%S")}')
     for journey in journeys:
         nightjet = Nightjet(journey[0], journey[1], travelers)
         nightjet.list_offers(journey[2], int(journey[3]) if len(journey) > 3 else 3)
