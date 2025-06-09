@@ -157,15 +157,13 @@ class Nightjet:
             requests.get(f'{BOOKING_URL}/stations/find', params=self.default_body | {'name': to_station}).json())
         self.travelers = [Traveler.male(1980)] if not travelers else travelers
 
-    def list_offers(self, reverse_direction: bool, date: str, results: int = 3):
-        fs = self.to_station if reverse_direction else self.from_station
-        ts = self.from_station if reverse_direction else self.to_station
-
-        print(f'{fs} -> {ts} {"return" if reverse_direction else "outward"} connections up from {date}:')
+    def list_offers(self, travel_date: str, results: int = 3):
+        print(f'Request date: {date.today().strftime("%Y-%m-%d")}')
+        print(f'{self.from_station} -> {self.to_station} connections up from {travel_date}:')
 
         connections = []
         while len(connections) < results:
-            connection_response = requests.get(f'{BOOKING_URL}/connection/{str(fs.eva_number)}/{str(ts.eva_number)}/{date}', params={'skip': len(connections)}).json()
+            connection_response = requests.get(f'{BOOKING_URL}/connection/{str(self.from_station.eva_number)}/{str(self.to_station.eva_number)}/{travel_date}', params={'skip': len(connections)}).json()
             if not connection_response['connections'] or len(connection_response['connections']) == 0:
                 print(f'No matching connections found')
                 return
@@ -189,21 +187,24 @@ class Nightjet:
                     print(f'  {len(connections)}: {connection}:')
                     print(f'  - No offers') if not offers else [print(f'  - {str(o)}') for o in offers]
 
-
         print('')
 
 
-if len(sys.argv) < 3:
-    print("Missing start and destination station / city arguments")
+if len(sys.argv) < 2:
+    print("Missing journey arguments\nUsage:\n  python check.py 'Berlin|Wien|2025-09-01' 'Wien|Berlin|2025-09-10'")
     exit(-1)
 
-print(f'Creation date: {date.today().strftime("%Y-%m-%d")}')
+# TODO Replace by usage of argparse
+journeys = []
+for arg in sys.argv[1:]:
+    journey = arg.split('|')
+    if len(journey) < 3:
+        print("Require at least 3 parts of journey like this: 'Wien|Berlin|2025-09-10'")
+    journeys.append(journey)
 
+# TODO Make this an argument
 travelers = [Traveler.female(1983), Traveler.male(1979), Traveler.male(2011), Traveler.male(2017)]
-nightjet = Nightjet(sys.argv[1], sys.argv[2], travelers)
-nightjet.list_offers(False, '2025-10-18', 6)
-nightjet.list_offers(True, '2025-10-27', 6)
-# just 2 check if it works we try 2 retrieve offers close 2 now
-today = (date.today() + timedelta(weeks=4)).strftime('%Y-%m-%d')
-nightjet.list_offers(False, today, 3)
-nightjet.list_offers(True, today, 3)
+
+for journey in journeys:
+    nightjet = Nightjet(journey[0], journey[1], travelers)
+    nightjet.list_offers(journey[2], int(journey[3]) if len(journey) > 3 else 3)

@@ -31,7 +31,7 @@ jobs:
 
     - name: Run script
       run: |
-        python check.py 'München' 'Mailand' > results.txt
+        python check.py 'München|Mailand|2025-10-18|6' 'Mailand|München|2025-10-27|6' 'Berlin|Wien|2025-10-18' > results.txt
 
 #    - name: Checkout wiki code
 #      uses: actions/checkout@v4
