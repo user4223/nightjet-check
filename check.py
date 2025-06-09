@@ -67,7 +67,7 @@ class Train:
         self.arrival = arrival
 
     def __str__(self):
-        return f'{self.ident} ({self.departure} - {self.arrival})'
+        return f'{self.ident} ({self.departure} -> {self.arrival})'
 
 
 class Offer:
@@ -110,7 +110,7 @@ class Connection:
         self.trains = trains
 
     def __str__(self):
-        return f'{self.from_station} -> {self.to_station}: {", ".join([str(t) for t in self.trains])}'
+        return f'{self.from_station} -> {self.to_station}'
 
     def get_departure_train(self):
         if not self.trains:
@@ -207,7 +207,7 @@ class Nightjet:
                     return div
 
                 for x, connection in enumerate(connections):
-                    with li(f'{connection}:'):
+                    with li(f'{connection} {", ".join([str(train) for train in connection.trains])}:'):
                         attr(cls='even' if x % 2 == 0 else 'odd')
 
                         with ul():
