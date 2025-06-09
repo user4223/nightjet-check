@@ -1,3 +1,4 @@
 
 requests
 jsonpath2
+dominate

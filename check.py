@@ -4,6 +4,8 @@ from typing import List, Dict
 from jsonpath2.path import Path
 from datetime import date, timedelta
 import sys
+import dominate
+from dominate.tags import *
 
 BOOKING_URL= f'https://www.nightjet.com/nj-booking-ocp'
 
@@ -158,36 +160,37 @@ class Nightjet:
         self.travelers = [Traveler.male(1980)] if not travelers else travelers
 
     def list_offers(self, travel_date: str, results: int = 3):
-        print(f'Request date: {date.today().strftime("%Y-%m-%d")}')
-        print(f'{self.from_station} -> {self.to_station} connections up from {travel_date}:')
+        with div():
+            p(f'Requested at {date.today().strftime("%Y-%m-%d")} from {BOOKING_URL}')
+            p(f'{self.from_station} -> {self.to_station} connections up from {travel_date}:')
 
-        connections = []
-        while len(connections) < results:
-            connection_response = requests.get(f'{BOOKING_URL}/connection/{str(self.from_station.eva_number)}/{str(self.to_station.eva_number)}/{travel_date}', params={'skip': len(connections)}).json()
-            if not connection_response['connections'] or len(connection_response['connections']) == 0:
-                print(f'No matching connections found')
-                return
+            connections = []
+            while len(connections) < results:
+                connection_response = requests.get(f'{BOOKING_URL}/connection/{str(self.from_station.eva_number)}/{str(self.to_station.eva_number)}/{travel_date}', params={'skip': len(connections)}).json()
+                if not connection_response['connections'] or len(connection_response['connections']) == 0:
+                    p(f'No matching connections found')
+                    return
 
-            connection_page = [Connection.from_json(c) for c in connection_response['connections']]
-            for connection in connection_page:
-                if len(connections) < results:
-                    departure_train = connection.get_departure_train()
-                    body = {
-                        "njFrom": connection.from_station.eva_number,
-                        "njTo": connection.to_station.eva_number,
-                        "njDep": departure_train.departure_stamp,
-                        "maxChanges": 0,
-                        "connections": 1,
-                        "filter": { "njTrain": departure_train.ident, "njDeparture": departure_train.departure_stamp },
-                        "objects": [{ "type": "person", "gender": t.gender, "birthDate": str(t.year_of_birth) + "-06-08", "cards": []} for t in self.travelers]
-                    }
-                    offers = Offer.from_json(requests.post(f'{BOOKING_URL}/offer/get', headers=self.default_header, json=self.default_body | body).json())
+                connection_page = [Connection.from_json(c) for c in connection_response['connections']]
+                for connection in connection_page:
+                    if len(connections) < results:
+                        departure_train = connection.get_departure_train()
+                        body = {
+                            "njFrom": connection.from_station.eva_number,
+                            "njTo": connection.to_station.eva_number,
+                            "njDep": departure_train.departure_stamp,
+                            "maxChanges": 0,
+                            "connections": 1,
+                            "filter": { "njTrain": departure_train.ident, "njDeparture": departure_train.departure_stamp },
+                            "objects": [{ "type": "person", "gender": t.gender, "birthDate": str(t.year_of_birth) + "-06-08", "cards": []} for t in self.travelers]
+                        }
+                        offers = Offer.from_json(requests.post(f'{BOOKING_URL}/offer/get', headers=self.default_header, json=self.default_body | body).json())
 
-                    connections.append(connection)
-                    print(f'  {len(connections)}: {connection}:')
-                    print(f'  - No offers') if not offers else [print(f'  - {str(o)}') for o in offers]
+                        connections.append(connection)
+                        p(f'  {len(connections)}: {connection}:')
+                        p(f'  - No offers') if not offers else [p(f'  - {str(o)}') for o in offers]
 
-        print('')
+        return div
 
 
 if len(sys.argv) < 2:
@@ -205,6 +208,10 @@ for arg in sys.argv[1:]:
 # TODO Make this an argument
 travelers = [Traveler.female(1983), Traveler.male(1979), Traveler.male(2011), Traveler.male(2017)]
 
-for journey in journeys:
-    nightjet = Nightjet(journey[0], journey[1], travelers)
-    nightjet.list_offers(journey[2], int(journey[3]) if len(journey) > 3 else 3)
+doc = dominate.document(title='Nightjet offers retrieved from https://www.nightjet.com')
+with doc:
+    for journey in journeys:
+        nightjet = Nightjet(journey[0], journey[1], travelers)
+        nightjet.list_offers(journey[2], int(journey[3]) if len(journey) > 3 else 3)
+
+print(doc)
