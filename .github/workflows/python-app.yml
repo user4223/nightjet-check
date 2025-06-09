@@ -17,7 +17,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
 
     - name: Set up Python
       uses: actions/setup-python@v3
@@ -29,29 +30,23 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Publish results to wiki
-      uses: Andrew-Chen-Wang/github-wiki-action@v4
+    - name: Checkout wiki
+      uses: actions/checkout@v4
+      with:
+        repository: ${{github.repository}}.wiki
+        path: wiki
 
     - name: Run script
       run: |
-        python check.py 'München|Mailand|2025-10-18|6' 'Mailand|München|2025-10-27|6' 'Berlin|Wien|2025-10-18' > wiki/results.txt
+        python check.py 'München|Mailand|2025-10-18|6' 'Mailand|München|2025-10-27|6' 'Berlin|Wien|2025-10-18' > wiki/results.txt        
 
-#    - name: Checkout wiki code
-#      uses: actions/checkout@v4
-#      with:
-#        repository: ${{github.repository}}.wiki
-#        path: wiki
-#
-#    - name: Push to wiki
-#      env:
-#        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#      run: |
-#        cd wiki
-#        cp ../results.txt .
-#        git config --local user.email "action@github.com"
-#        git config --local user.name "GitHub Action"
-#        git add .
-#        git diff-index --quiet HEAD || git commit -m "Update wiki" && git push
+    - name: Push results to wiki
+      run: |
+        cd wiki
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add .
+        git diff-index --quiet HEAD || git commit -m "Add changes" && git push
 
 #    - uses: actions/upload-artifact@v4
 #      with:
