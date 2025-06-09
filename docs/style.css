@@ -1,0 +1,12 @@
+
+.headline {
+    background-color: #DDD;
+}
+
+li.odd {
+    background-color: #FFF;
+}
+
+li.even {
+    background-color: #EEE;
+}

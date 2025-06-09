@@ -2,7 +2,7 @@
 import requests
 from typing import List, Dict
 from jsonpath2.path import Path
-from datetime import date, timedelta
+from datetime import datetime
 import sys
 import dominate
 from dominate.tags import *
@@ -198,15 +198,17 @@ class Nightjet:
         connections = self._get_connections(travel_date, results)
 
         with div():
-            p(f'Requested at {date.today().strftime("%Y-%m-%d")} from {BOOKING_URL}')
-            h3(f'{self.from_station} -> {self.to_station} connections up from {travel_date}:')
+            with h3(f'{self.from_station} -> {self.to_station} connections up from {travel_date}:'):
+                attr(cls='headline')
 
-            if not connections:
-                p(f'No matching connections found')
+            with ol():
+                if not connections:
+                    li(f'No matching connections found')
 
-            for x, connection in enumerate(connections):
-                p(f'  {x + 1}: {connection}:')
-                p(f'  - No offers') if not connection.offers else [p(f'  - {str(o)}') for o in connection.offers]
+                for x, connection in enumerate(connections):
+                    with li(f'{connection}:'):
+                        attr(cls={'even' if x % 2 == 0 else 'odd'})
+                        p(f'- No offers') if not connection.offers else [p(f'- {str(o)}') for o in connection.offers]
 
         return div
 
@@ -227,7 +229,10 @@ for arg in sys.argv[1:]:
 travelers = [Traveler.female(1983), Traveler.male(1979), Traveler.male(2011), Traveler.male(2017)]
 
 doc = dominate.document(title='Nightjet offers retrieved from https://www.nightjet.com')
+with doc.head:
+    link(rel='stylesheet', href='style.css')
 with doc:
+    p(f'Requested at {datetime.today().strftime("%d-%m-%Y %H:%M:%S")} from {BOOKING_URL}')
     for journey in journeys:
         nightjet = Nightjet(journey[0], journey[1], travelers)
         nightjet.list_offers(journey[2], int(journey[3]) if len(journey) > 3 else 3)
