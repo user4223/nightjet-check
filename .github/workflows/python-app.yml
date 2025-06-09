@@ -50,9 +50,13 @@ jobs:
 #        git add .
 #        git diff-index --quiet HEAD || git commit -m "Update wiki" && git push
 
-    - uses: actions/upload-artifact@v4
+    - uses: Andrew-Chen-Wang/github-wiki-action@v4
       with:
-        name: results
         path: results.txt
-        overwrite: true
-        compression-level: 0
+
+#    - uses: actions/upload-artifact@v4
+#      with:
+#        name: results
+#        path: results.txt
+#        overwrite: true
+#        compression-level: 0
