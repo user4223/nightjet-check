@@ -70,11 +70,32 @@ class Train:
         return f'{self.ident} ({self.departure} - {self.arrival})'
 
 
+class Offer:
+
+    offers_path = Path.parse_str('$..offers[*]')
+    compartments_path = Path.parse_str('$..compartments[*].name.de')
+    name: str
+    details: List[str]
+
+    @staticmethod
+    def from_json(offer_json: str):
+        offers = [x.current_value for x in Offer.offers_path.match(offer_json)]
+        return [Offer(o['name'], [c.current_value for c in Offer.compartments_path.match(o)]) for o in offers]
+
+    def __init__(self, name: str, details: List[str]):
+        self.name = name
+        self.details = details
+
+    def __str__(self):
+        return f'{self.name}: ({", ".join(self.details)})'
+
+
 class Connection:
 
     from_station: Station
     to_station: Station
     trains: List[Train]
+    offers: List[Offer]
 
     @staticmethod
     def from_json(connection_json: Dict):
@@ -97,25 +118,9 @@ class Connection:
 
         return self.trains[0]
 
-
-class Offer:
-
-    offers_path = Path.parse_str('$..offers[*]')
-    compartments_path = Path.parse_str('$..compartments[*].name.de')
-    name: str
-    details: List[str]
-
-    @staticmethod
-    def from_json(offer_json: str):
-        offers = [x.current_value for x in Offer.offers_path.match(offer_json)]
-        return [Offer(o['name'], [c.current_value for c in Offer.compartments_path.match(o)]) for o in offers]
-
-    def __init__(self, name: str, details: List[str]):
-        self.name = name
-        self.details = details
-
-    def __str__(self):
-        return f'{self.name}: ({", ".join(self.details)})'
+    def add_offers(self, offers: List[Offer]):
+        self.offers = offers
+        return self
 
 
 class Traveler:
@@ -159,36 +164,49 @@ class Nightjet:
             requests.get(f'{BOOKING_URL}/stations/find', params=self.default_body | {'name': to_station}).json())
         self.travelers = [Traveler.male(1980)] if not travelers else travelers
 
+    def _get_connections(self, travel_date: str, results: int = 3):
+        connections = []
+        while len(connections) < results:
+            connection_response = requests.get(
+                f'{BOOKING_URL}/connection/{str(self.from_station.eva_number)}/{str(self.to_station.eva_number)}/{travel_date}',
+                params={'skip': len(connections)}).json()
+            if not connection_response['connections'] or len(connection_response['connections']) == 0:
+                return connections
+
+            connection_page = [Connection.from_json(c) for c in connection_response['connections']]
+            for connection in connection_page:
+                if len(connections) < results:
+                    departure_train = connection.get_departure_train()
+                    body = {
+                        "njFrom": connection.from_station.eva_number,
+                        "njTo": connection.to_station.eva_number,
+                        "njDep": departure_train.departure_stamp,
+                        "maxChanges": 0,
+                        "connections": 1,
+                        "filter": {"njTrain": departure_train.ident, "njDeparture": departure_train.departure_stamp},
+                        "objects": [{"type": "person", "gender": t.gender, "birthDate": str(t.year_of_birth) + "-06-08",
+                                     "cards": []} for t in self.travelers]
+                    }
+                    connection.add_offers(Offer.from_json(requests.post(f'{BOOKING_URL}/offer/get', headers=self.default_header,
+                                                           json=self.default_body | body).json()))
+
+                    connections.append(connection)
+
+        return connections
+
     def list_offers(self, travel_date: str, results: int = 3):
+        connections = self._get_connections(travel_date, results)
+
         with div():
             p(f'Requested at {date.today().strftime("%Y-%m-%d")} from {BOOKING_URL}')
-            p(f'{self.from_station} -> {self.to_station} connections up from {travel_date}:')
+            h3(f'{self.from_station} -> {self.to_station} connections up from {travel_date}:')
 
-            connections = []
-            while len(connections) < results:
-                connection_response = requests.get(f'{BOOKING_URL}/connection/{str(self.from_station.eva_number)}/{str(self.to_station.eva_number)}/{travel_date}', params={'skip': len(connections)}).json()
-                if not connection_response['connections'] or len(connection_response['connections']) == 0:
-                    p(f'No matching connections found')
-                    return
+            if not connections:
+                p(f'No matching connections found')
 
-                connection_page = [Connection.from_json(c) for c in connection_response['connections']]
-                for connection in connection_page:
-                    if len(connections) < results:
-                        departure_train = connection.get_departure_train()
-                        body = {
-                            "njFrom": connection.from_station.eva_number,
-                            "njTo": connection.to_station.eva_number,
-                            "njDep": departure_train.departure_stamp,
-                            "maxChanges": 0,
-                            "connections": 1,
-                            "filter": { "njTrain": departure_train.ident, "njDeparture": departure_train.departure_stamp },
-                            "objects": [{ "type": "person", "gender": t.gender, "birthDate": str(t.year_of_birth) + "-06-08", "cards": []} for t in self.travelers]
-                        }
-                        offers = Offer.from_json(requests.post(f'{BOOKING_URL}/offer/get', headers=self.default_header, json=self.default_body | body).json())
-
-                        connections.append(connection)
-                        p(f'  {len(connections)}: {connection}:')
-                        p(f'  - No offers') if not offers else [p(f'  - {str(o)}') for o in offers]
+            for x, connection in enumerate(connections):
+                p(f'  {x + 1}: {connection}:')
+                p(f'  - No offers') if not connection.offers else [p(f'  - {str(o)}') for o in connection.offers]
 
         return div
 
