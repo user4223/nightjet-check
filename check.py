@@ -216,9 +216,7 @@ class Nightjet:
 
                             for y, offer in enumerate(connection.offers):
                                 with li(f'{offer.name}'):
-                                    br()
                                     p(f'{", ".join(offer.details)}')
-
 
         return div
 
