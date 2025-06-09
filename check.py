@@ -170,11 +170,11 @@ class Nightjet:
             connection_response = requests.get(
                 f'{BOOKING_URL}/connection/{str(self.from_station.eva_number)}/{str(self.to_station.eva_number)}/{travel_date}',
                 params={'skip': len(connections)}).json()
-            if not connection_response['connections'] or len(connection_response['connections']) == 0:
+
+            if not connection_response.get('connections', None):
                 return connections
 
-            connection_page = [Connection.from_json(c) for c in connection_response['connections']]
-            for connection in connection_page:
+            for connection in [Connection.from_json(c) for c in connection_response['connections']]:
                 if len(connections) < results:
                     departure_train = connection.get_departure_train()
                     body = {
