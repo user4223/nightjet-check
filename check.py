@@ -42,7 +42,7 @@ class Station:
         self.name = name
 
     def __str__(self):
-        return f'{self.name}{" Area" if self.meta else ""} ({str(self.eva_number)})'
+        return f'{self.name.upper() if self.meta else self.name} ({str(self.eva_number)})'
 
 
 class Train:
@@ -164,7 +164,7 @@ class Nightjet:
             requests.get(f'{BOOKING_URL}/stations/find', params=self.default_body | {'name': to_station}).json())
         self.travelers = [Traveler.male(1980)] if not travelers else travelers
 
-    def _get_connections(self, travel_date: str, results: int = 3):
+    def get_connections(self, travel_date: str, results: int = 3):
         connections = []
         while len(connections) < results:
             connection_response = requests.get(
@@ -195,7 +195,7 @@ class Nightjet:
         return connections
 
     def list_offers(self, travel_date: str, results: int = 3):
-        connections = self._get_connections(travel_date, results)
+        connections = self.get_connections(travel_date, results)
 
         with div():
             with h3(f'{self.from_station} -> {self.to_station} connections up from {travel_date}'):
@@ -204,17 +204,27 @@ class Nightjet:
             with ol():
                 if not connections:
                     li(f'No matching connections found')
+                    return div
 
                 for x, connection in enumerate(connections):
                     with li(f'{connection}:'):
                         attr(cls='even' if x % 2 == 0 else 'odd')
-                        p(f'- No offers') if not connection.offers else [p(f'- {str(o)}') for o in connection.offers]
+
+                        with ul():
+                            if not connection.offers:
+                                li(f'No offers')
+
+                            for y, offer in enumerate(connection.offers):
+                                with li(f'{offer.name}'):
+                                    br()
+                                    p(f'{", ".join(offer.details)}')
+
 
         return div
 
 
 if len(sys.argv) < 2:
-    print("Missing journey arguments\nUsage:\n  python check.py 'Berlin|Wien|2025-09-01' 'Wien|Berlin|2025-09-10'")
+    print("Missing journey arguments\nUsage:\n  python check.py 'Berlin|Wien|2025-09-01' 'Wien|Berlin|2025-09-10' ...")
     exit(-1)
 
 # TODO Replace by usage of argparse
