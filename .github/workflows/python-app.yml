@@ -30,23 +30,24 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Checkout wiki
-      uses: actions/checkout@v4
-      with:
-        repository: ${{github.repository}}.wiki
-        path: wiki
-
     - name: Run script
       run: |
-        python check.py 'München|Mailand|2025-10-18|6' 'Mailand|München|2025-10-27|6' 'Berlin|Wien|2025-10-18' > wiki/results.txt        
+        python check.py 'München|Mailand|2025-10-18|6' 'Mailand|München|2025-10-27|6' 'Berlin|Wien|2025-10-18' > docs/index.html
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: docs/
 
-    - name: Push results to wiki
-      run: |
-        cd wiki
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        git add .
-        git diff-index --quiet HEAD || git commit -m "Add changes" && git push
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
 
 #    - uses: actions/upload-artifact@v4
 #      with:
