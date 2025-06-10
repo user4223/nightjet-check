@@ -207,15 +207,22 @@ class Nightjet:
                     return div
 
                 for x, connection in enumerate(connections):
-                    with li(f'{connection} {", ".join([str(train) for train in connection.trains])}:'):
+                    with li():
                         attr(cls='even' if x % 2 == 0 else 'odd')
+                        span(f'{connection.from_station} -> {connection.to_station}')
+                        br()
+                        for train in connection.trains:
+                            with span(train.ident):
+                                attr(cls='train')
+                            span(f'{train.departure} -> {train.arrival}')
 
                         with ul():
                             if not connection.offers:
                                 li(span(f'No offers'))
 
                             for y, offer in enumerate(connection.offers):
-                                with li(span(f'{offer.name}')):
+                                with li():
+                                    span(f'{offer.name}')
                                     br()
                                     span(f'{", ".join(offer.details)}')
 

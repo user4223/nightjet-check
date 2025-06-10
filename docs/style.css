@@ -10,3 +10,7 @@ li.odd {
 li.even {
     background-color: #FFF;
 }
+
+.train {
+    font-weight: bold;
+}
