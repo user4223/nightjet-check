@@ -217,7 +217,8 @@ if __name__ == '__main__':
         link(rel='stylesheet', href='style.css')
 
     with doc:
-        p(f'Retrieved from {BOOKING_URL} at {datetime.today().strftime("%d.%m.%Y %H:%M:%S")}')
+        with p(f'Retrieved from {BOOKING_URL} at {datetime.today().strftime("%d.%m.%Y %H:%M:%S")}'):
+            attr(id='status')
         with p(f'Disclaimer: This is just of snapshot of booking status for specific Nightjet connections without any '
                f'claim for correctness and/or completeness and it is considered for private/personal use only'):
             attr(id='disclaimer')
@@ -225,8 +226,8 @@ if __name__ == '__main__':
         for journey in journeys:
             nightjet = Nightjet(journey[0], journey[1], travelers)
 
-            result_no = int(journey[3]) if len(journey) > 3 else 3
             travel_date = journey[2]
+            result_no = int(journey[3]) if len(journey) > 3 else 3
             connections = nightjet.get_connections(travel_date, result_no)
 
             with div():
