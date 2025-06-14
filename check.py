@@ -218,8 +218,10 @@ if __name__ == '__main__':
 
     with doc:
         p(f'Retrieved from {BOOKING_URL} at {datetime.today().strftime("%d.%m.%Y %H:%M:%S")}')
-        with p(f'Disclaimer: This is just of snapshot of booking status for specific Nightjet connections without any claim for correctness and completeness'):
+        with p(f'Disclaimer: This is just of snapshot of booking status for specific Nightjet connections without any '
+               f'claim for correctness and/or completeness and it is considered for private/personal use only'):
             attr(id='disclaimer')
+
         for journey in journeys:
             nightjet = Nightjet(journey[0], journey[1], travelers)
 
