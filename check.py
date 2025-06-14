@@ -212,15 +212,15 @@ if __name__ == '__main__':
     # TODO Make this an argument
     travelers = [Traveler.female(1983), Traveler.male(1979), Traveler.male(2011), Traveler.male(2017)]
 
-    doc = dominate.document(title='Nightjet offers retrieved from https://www.nightjet.com')
+    doc = dominate.document(title='Night train offers retrieved from https://www.nightjet.com')
     with doc.head:
         link(rel='stylesheet', href='style.css')
 
     with doc:
-        with p(f'Retrieved from {BOOKING_URL} at {datetime.today().strftime("%d.%m.%Y %H:%M:%S")}'):
+        with p(f'Retrieved from {BOOKING_URL} at {datetime.today().strftime("%d.%m.%Y %H:%M:%S")} UTC'):
             attr(id='status')
-        with p(f'Disclaimer: This is just of snapshot of booking status for specific Nightjet connections without any '
-               f'claim for correctness and/or completeness and it is considered for private/personal use only'):
+        with p(f'Disclaimer: This is just a snapshot of booking status for specific night train connections without '
+               f'any claim for correctness and/or completeness and it is considered for private/personal use only'):
             attr(id='disclaimer')
 
         for journey in journeys:
