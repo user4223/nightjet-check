@@ -15,10 +15,10 @@ li.even {
     font-weight: bold;
 }
 
-#disclaimer {
+p#disclaimer {
     background-color: #FCC;
 }
 
-#status {
+p#retrieval-status {
     background-color: #FFFAA0;
 }

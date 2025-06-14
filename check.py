@@ -218,7 +218,7 @@ if __name__ == '__main__':
 
     with doc:
         with p(f'Retrieved from {BOOKING_URL} at {datetime.today().strftime("%d.%m.%Y %H:%M:%S")} UTC'):
-            attr(id='status')
+            attr(id='retrieval-status')
         with p(f'Disclaimer: This is just a snapshot of booking status for specific night train connections without '
                f'any claim for correctness and/or completeness and it is considered for private/personal use only'):
             attr(id='disclaimer')
