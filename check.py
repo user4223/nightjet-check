@@ -194,63 +194,66 @@ class Nightjet:
 
         return connections
 
-    def list_offers(self, travel_date: str, results: int = 3):
-        connections = self.get_connections(travel_date, results)
 
-        with div():
-            with h3(f'{self.from_station} -> {self.to_station} connections up from {travel_date}'):
-                attr(cls='headline')
+if __name__ == '__main__':
 
-            with ol():
-                if not connections:
-                    li(f'No matching connections found')
-                    return div
+    if len(sys.argv) < 2:
+        print("Missing journey arguments\nUsage:\n  python check.py 'Berlin|Wien|2025-09-01' 'Wien|Berlin|2025-09-10' ...")
+        exit(-1)
 
-                for x, connection in enumerate(connections):
-                    with li():
-                        attr(cls='even' if x % 2 == 0 else 'odd')
-                        span(f'{connection.from_station} -> {connection.to_station}')
-                        br()
-                        for train in connection.trains:
-                            with span(train.ident):
-                                attr(cls='train')
-                            span(f'{train.departure} -> {train.arrival}')
+    # TODO Replace by usage of argparse
+    journeys = []
+    for arg in sys.argv[1:]:
+        journey = arg.split('|')
+        if len(journey) < 3:
+            print("Require at least 3 parts of journey like this: 'Wien|Berlin|2025-09-10'")
+        journeys.append(journey)
 
-                        with ul():
-                            if not connection.offers:
-                                li(span(f'No offers'))
+    # TODO Make this an argument
+    travelers = [Traveler.female(1983), Traveler.male(1979), Traveler.male(2011), Traveler.male(2017)]
 
-                            for y, offer in enumerate(connection.offers):
-                                with li():
-                                    span(f'{offer.name}')
-                                    br()
-                                    span(f'{", ".join(offer.details)}')
+    doc = dominate.document(title='Nightjet offers retrieved from https://www.nightjet.com')
+    with doc.head:
+        link(rel='stylesheet', href='style.css')
 
-        return div
+    with doc:
+        p(f'Retrieved from {BOOKING_URL} at {datetime.today().strftime("%d.%m.%Y %H:%M:%S")}')
+        with p(f'Disclaimer: This is just of snapshot of booking status for specific Nightjet connections without any claim for correctness and completeness'):
+            attr(id='disclaimer')
+        for journey in journeys:
+            nightjet = Nightjet(journey[0], journey[1], travelers)
 
+            result_no = int(journey[3]) if len(journey) > 3 else 3
+            travel_date = journey[2]
+            connections = nightjet.get_connections(travel_date, result_no)
 
-if len(sys.argv) < 2:
-    print("Missing journey arguments\nUsage:\n  python check.py 'Berlin|Wien|2025-09-01' 'Wien|Berlin|2025-09-10' ...")
-    exit(-1)
+            with div():
+                with h3(f'{nightjet.from_station} -> {nightjet.to_station} connections up from {travel_date}'):
+                    attr(cls='headline')
 
-# TODO Replace by usage of argparse
-journeys = []
-for arg in sys.argv[1:]:
-    journey = arg.split('|')
-    if len(journey) < 3:
-        print("Require at least 3 parts of journey like this: 'Wien|Berlin|2025-09-10'")
-    journeys.append(journey)
+                with ol():
+                    if not connections:
+                        li(f'No matching connections found')
+                        continue
 
-# TODO Make this an argument
-travelers = [Traveler.female(1983), Traveler.male(1979), Traveler.male(2011), Traveler.male(2017)]
+                    for x, connection in enumerate(connections):
+                        with li():
+                            attr(cls='even' if x % 2 == 0 else 'odd')
+                            span(f'{connection.from_station} -> {connection.to_station}')
+                            br()
+                            for train in connection.trains:
+                                with span(train.ident):
+                                    attr(cls='train')
+                                span(f'{train.departure} -> {train.arrival}')
 
-doc = dominate.document(title='Nightjet offers retrieved from https://www.nightjet.com')
-with doc.head:
-    link(rel='stylesheet', href='style.css')
-with doc:
-    p(f'Retrieved from {BOOKING_URL} at {datetime.today().strftime("%d.%m.%Y %H:%M:%S")}')
-    for journey in journeys:
-        nightjet = Nightjet(journey[0], journey[1], travelers)
-        nightjet.list_offers(journey[2], int(journey[3]) if len(journey) > 3 else 3)
+                            with ul():
+                                if not connection.offers:
+                                    li(span(f'No offers'))
 
-print(doc)
+                                for y, offer in enumerate(connection.offers):
+                                    with li():
+                                        span(f'{offer.name}')
+                                        br()
+                                        span(f'{", ".join(offer.details)}')
+
+    print(doc)
