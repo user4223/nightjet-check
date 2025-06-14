@@ -231,7 +231,7 @@ if __name__ == '__main__':
             connections = nightjet.get_connections(travel_date, result_no)
 
             with div():
-                with h3(f'{nightjet.from_station} -> {nightjet.to_station} connections up from {travel_date}'):
+                with h3(f'{nightjet.from_station} -> {nightjet.to_station}: Connections up from {travel_date}'):
                     attr(cls='headline')
 
                 with ol():
