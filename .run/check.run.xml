@@ -1,5 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="check" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
+    <output_file path="$PROJECT_DIR$/docs/index.html" is_save="true" />
     <module name="nightjet-check" />
     <option name="ENV_FILES" value="" />
     <option name="INTERPRETER_OPTIONS" value="" />
