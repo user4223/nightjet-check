@@ -34,7 +34,7 @@ jobs:
 
     - name: Run script
       run: |
-        python check.py 'München|Mailand|2025-10-18|6' 'Mailand|München|2025-10-27|6' 'Berlin|Wien|2025-10-18' > docs/index.html
+        python check.py 'Berlin|Wien|2026-01-31|3' 'Wien|Berlin|2025-02-06|3' > docs/index.html
 
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3
